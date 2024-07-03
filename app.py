@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, request, flash, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
+import datetime
 
 
 app = Flask(__name__)
@@ -31,6 +32,46 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
+    
+class Mill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, default=datetime.datetime.now)
+    m_credit = db.Column(db.Integer, nullable=False)
+    flour_rs = db.Column(db.Integer, nullable=False)
+    flour_weight = db.Column(db.Integer, nullable=False)
+    oil_rs = db.Column(db.Integer, nullable=False)
+    oil_weight = db.Column(db.Integer, nullable=False)
+    khari_rs = db.Column(db.Integer, nullable=False)
+    khari_weight = db.Column(db.Integer, nullable=False)
+    labour_dscri = db.Column(db.String(100), nullable=False)
+    labour_rs = db.Column(db.Integer, nullable=False)
+    mill_debit = db.Column(db.Integer, nullable=False)
+    mill_dscri = db.Column(db.String(100), nullable=False)
+    home_debit = db.Column(db.Integer, nullable=False)
+    home_dscri = db.Column(db.String(100), nullable=False)
+    gehum_rs = db.Column(db.Integer, nullable=False)
+    gehum_weight = db.Column(db.Integer, nullable=False)
+    total_credit = db.Column(db.Integer, nullable=False)
+    total_debit = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, m_credit, flour_rs, flour_weight, oil_rs, oil_weight, khari_rs, khari_weight, labour_dscri, labour_rs, mill_debit, mill_dscri, home_debit, home_dscri, gehum_rs, gehum_weight):
+        self.m_credit = m_credit
+        self.flour_rs = flour_rs
+        self.flour_weight = flour_weight
+        self.oil_rs = oil_rs
+        self.oil_weight = oil_weight
+        self.khari_rs = khari_rs
+        self.khari_weight = khari_weight
+        self.labour_dscri = labour_dscri
+        self.labour_rs = labour_rs
+        self.mill_debit = mill_debit
+        self.mill_dscri = mill_dscri
+        self.home_debit = home_debit
+        self.home_dscri = home_dscri
+        self.gehum_rs = gehum_rs
+        self.gehum_weight = gehum_weight
+        self.total_credit = int(m_credit) + int(flour_rs) + int(oil_rs) + int(khari_rs)
+        self.total_debit = int(mill_debit) + int(home_debit) + int(gehum_rs) + int(labour_rs)
  
 # Create Database with the name of "User"
 class Contactus(db.Model):
@@ -98,7 +139,40 @@ def login():
 @app.route('/dashboard')
 def dashboard():
     if 'email' in session:
-        return render_template('dashboard.html', title='Dashboard', current_page='dashboard')
+        products = Mill.query.all()
+        return render_template('dashboard.html', title='Dashboard', current_page='dashboard', products=products)
+    else:
+        flash('You need to login first.', 'error')
+        return redirect('/login')
+
+#add_new_data
+@app.route('/add_new_data', methods=['GET', 'POST'])
+def add_new_data():
+    if 'email' in session:
+        if request.method == 'POST':
+            m_credit = request.form['m_credit']
+            flour_rs = request.form['flour_rs']
+            flour_weight = request.form['flour_weight']
+            oil_rs = request.form['oil_rs']
+            oil_weight = request.form['oil_weight']
+            khari_rs = request.form['khari_rs']
+            khari_weight = request.form['khari_weight']
+            labour_dscri = request.form['labour_dscri']
+            labour_rs = request.form['labour_rs']
+            mill_debit = request.form['mill_debit']
+            mill_dscri = request.form['mill_dscri']
+            home_debit = request.form['home_debit']
+            home_dscri = request.form['home_dscri']
+            gehum_rs = request.form['gehum_rs']
+            gehum_weight = request.form['gehum_weight']
+
+            new_product = Mill(m_credit, flour_rs, flour_weight, oil_rs, oil_weight, khari_rs, khari_weight, labour_dscri, labour_rs, mill_debit, mill_dscri, home_debit, home_dscri, gehum_rs, gehum_weight)
+            db.session.add(new_product)
+            db.session.commit()
+            flash('Added successful.', 'success')
+            return redirect('/add_new_data')
+
+        return render_template('add_new.html', title='Add data', current_page='dashboard')
     else:
         flash('You need to login first.', 'error')
         return redirect('/login')

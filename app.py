@@ -158,7 +158,12 @@ def login():
 @app.route('/dashboard')
 def dashboard():
     if 'email' in session:
-        products = MillData.query.all()
+        user = User.query.filter_by(email=session['email']).first()
+
+        current_year = datetime.datetime.now().year
+        current_month = datetime.datetime.now().month
+        products = MillData.query.filter(MillData.user_id == user.id, db.extract('year', MillData.date) == current_year, db.extract('month', MillData.date) == current_month).all()
+
         return render_template('dashboard.html', title='Dashboard', current_page='dashboard', products=products)
     else:
         flash('You need to login first.', 'error')
@@ -192,6 +197,13 @@ def add_new_data():
 
             gehum_weight = request.form['gehum_weight']
             gehum_rs = request.form['gehum_rs']
+
+            # Check if data for today already exists
+            today = datetime.date.today()
+            today_data = MillData.query.filter_by(user_id=user.id, date=today).first()
+            if today_data:
+                flash("Today's mill data already exists.", 'error')
+                return redirect('/add_new_data')
             
 
             new_data = MillData(user_id=user.id, mill_credit=mill_credit, flour_weight=flour_weight, flour_rs=flour_rs, oil_weight=oil_weight, oil_rs=oil_rs, khari_weight=khari_weight, khari_rs=khari_rs, labour_dscri=labour_dscri, labour_rs=labour_rs, mill_debit=mill_debit, mill_dscri=mill_dscri, home_debit=home_debit, home_dscri=home_dscri, gehum_weight=gehum_weight, gehum_rs=gehum_rs)

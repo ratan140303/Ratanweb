@@ -155,16 +155,53 @@ def login():
     return render_template('login.html')
 
 #Dashboard
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if 'email' in session:
         user = User.query.filter_by(email=session['email']).first()
 
-        current_year = datetime.datetime.now().year
-        current_month = datetime.datetime.now().month
-        products = MillData.query.filter(MillData.user_id == user.id, db.extract('year', MillData.date) == current_year, db.extract('month', MillData.date) == current_month).all()
+        current_year = datetime.datetime.now().year # Give: 2024/2023..
+        current_month = datetime.datetime.now().month # Give: 1/2/3/4/5..
+        
 
-        return render_template('dashboard.html', title='Dashboard', current_page='dashboard', products=products)
+        # Default filter values
+        year = request.form.get('year', current_year) #try to get from year. if not get set as defult current_year
+        month = request.form.get('month', current_month) #try to get from year. if not get set as defult current_month
+
+        mill_dairy_datas = MillData.query.filter(
+            MillData.user_id == user.id,
+            db.extract('year', MillData.date) == int(year),
+            db.extract('month', MillData.date) == int(month)
+        ).all()
+
+        # Calculate totals
+        total_t_credit = sum(data.total_credit for data in mill_dairy_datas)
+        total_t_debit = sum(data.total_debit for data in mill_dairy_datas)
+        total_m_credit = sum(data.mill_credit for data in mill_dairy_datas)
+        total_flour_rs = sum(data.flour_rs for data in mill_dairy_datas)
+        total_flour_weight = sum(data.flour_weight for data in mill_dairy_datas)
+        total_oil_rs = sum(data.oil_rs for data in mill_dairy_datas)
+        total_oil_weight = sum(data.oil_weight for data in mill_dairy_datas)
+        total_khari_rs = sum(data.khari_rs for data in mill_dairy_datas)
+        total_khari_weight = sum(data.khari_weight for data in mill_dairy_datas)
+        total_mill_debit = sum(data.mill_debit for data in mill_dairy_datas)
+        total_home_debit = sum(data.home_debit for data in mill_dairy_datas)
+        total_labour_rs = sum(data.labour_rs for data in mill_dairy_datas)
+        total_gehum_rs = sum(data.gehum_rs for data in mill_dairy_datas)
+        total_gehum_weight = sum(data.gehum_weight for data in mill_dairy_datas)
+
+        return render_template('dashboard.html', title='Dashboard', current_page='dashboard',
+                               mill_dairy_datas=mill_dairy_datas, current_year=current_year,
+                               current_month=current_month,
+                               total_t_credit=total_t_credit, total_t_debit=total_t_debit,
+                               total_m_credit=total_m_credit, total_flour_rs=total_flour_rs,
+                               total_flour_weight=total_flour_weight, total_oil_rs=total_oil_rs,
+                               total_oil_weight=total_oil_weight, total_khari_rs=total_khari_rs,
+                               total_khari_weight=total_khari_weight, total_mill_debit=total_mill_debit,
+                               total_home_debit=total_home_debit, total_labour_rs=total_labour_rs,
+                               total_gehum_rs=total_gehum_rs, total_gehum_weight=total_gehum_weight)
+
+        #return render_template('dashboard.html', title='Dashboard', current_page='dashboard', mill_dairy_datas=mill_dairy_datas, current_year=current_year, current_month=current_month)
     else:
         flash('You need to login first.', 'error')
         return redirect('/login')

@@ -21,6 +21,7 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    
 
     def __init__(self, email, password, name):
         self.name = name
@@ -33,47 +34,61 @@ class User(db.Model):
     def check_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
     
-class Mill(db.Model):
+class MillData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.Date, default=datetime.datetime.now)
-    m_credit = db.Column(db.Integer, nullable=False)
-    flour_rs = db.Column(db.Integer, nullable=False)
+    #Credits
+    mill_credit = db.Column(db.Integer, nullable=False)
+    
     flour_weight = db.Column(db.Integer, nullable=False)
-    oil_rs = db.Column(db.Integer, nullable=False)
+    flour_rs = db.Column(db.Integer, nullable=False)
+    
     oil_weight = db.Column(db.Integer, nullable=False)
-    khari_rs = db.Column(db.Integer, nullable=False)
+    oil_rs = db.Column(db.Integer, nullable=False)
+    
     khari_weight = db.Column(db.Integer, nullable=False)
+    khari_rs = db.Column(db.Integer, nullable=False)
+
+    # Debits
     labour_dscri = db.Column(db.String(100), nullable=False)
     labour_rs = db.Column(db.Integer, nullable=False)
+
     mill_debit = db.Column(db.Integer, nullable=False)
     mill_dscri = db.Column(db.String(100), nullable=False)
+
     home_debit = db.Column(db.Integer, nullable=False)
     home_dscri = db.Column(db.String(100), nullable=False)
-    gehum_rs = db.Column(db.Integer, nullable=False)
+
     gehum_weight = db.Column(db.Integer, nullable=False)
+    gehum_rs = db.Column(db.Integer, nullable=False)
+
+    # Total
     total_credit = db.Column(db.Integer, nullable=False)
     total_debit = db.Column(db.Integer, nullable=False)
+    user = db.relationship('User', backref=db.backref('milldatas', lazy=True))
 
-    def __init__(self, m_credit, flour_rs, flour_weight, oil_rs, oil_weight, khari_rs, khari_weight, labour_dscri, labour_rs, mill_debit, mill_dscri, home_debit, home_dscri, gehum_rs, gehum_weight):
-        self.m_credit = m_credit
-        self.flour_rs = flour_rs
+    def __init__(self, user_id, mill_credit, flour_weight, flour_rs, oil_weight, oil_rs, khari_weight, khari_rs, labour_dscri, labour_rs, mill_debit, mill_dscri, home_debit, home_dscri, gehum_weight, gehum_rs):
+        self.user_id = user_id
+        self.mill_credit = mill_credit
         self.flour_weight = flour_weight
-        self.oil_rs = oil_rs
+        self.flour_rs = flour_rs
         self.oil_weight = oil_weight
-        self.khari_rs = khari_rs
+        self.oil_rs = oil_rs
         self.khari_weight = khari_weight
+        self.khari_rs = khari_rs
         self.labour_dscri = labour_dscri
         self.labour_rs = labour_rs
         self.mill_debit = mill_debit
         self.mill_dscri = mill_dscri
         self.home_debit = home_debit
         self.home_dscri = home_dscri
-        self.gehum_rs = gehum_rs
         self.gehum_weight = gehum_weight
-        self.total_credit = int(m_credit) + int(flour_rs) + int(oil_rs) + int(khari_rs)
+        self.gehum_rs = gehum_rs
+        self.total_credit = int(mill_credit) + int(flour_rs) + int(oil_rs) + int(khari_rs)
         self.total_debit = int(mill_debit) + int(home_debit) + int(gehum_rs) + int(labour_rs)
  
-# Create Database with the name of "User"
+# Create Database for contact us
 class Contactus(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -99,6 +114,12 @@ def index():
 @app.route('/signup', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        # Check if there's already a user registered
+        existing_users = User.query.count()
+        if existing_users >= 2:
+            flash('Registration is closed. Only two user is allowed to the website', 'error')
+            return redirect('/login')
+
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
@@ -116,7 +137,6 @@ def register():
 
     return render_template('signup.html')
 
-
 # Login Page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -132,14 +152,13 @@ def login():
         else:
             error = 'Invalid email or password. Please try again.'
             flash(error, 'error')
-
     return render_template('login.html')
 
 #Dashboard
 @app.route('/dashboard')
 def dashboard():
     if 'email' in session:
-        products = Mill.query.all()
+        products = MillData.query.all()
         return render_template('dashboard.html', title='Dashboard', current_page='dashboard', products=products)
     else:
         flash('You need to login first.', 'error')
@@ -149,25 +168,34 @@ def dashboard():
 @app.route('/add_new_data', methods=['GET', 'POST'])
 def add_new_data():
     if 'email' in session:
+        user = User.query.filter_by(email=session['email']).first()
         if request.method == 'POST':
-            m_credit = request.form['m_credit']
-            flour_rs = request.form['flour_rs']
+            mill_credit = request.form['m_credit']
+
             flour_weight = request.form['flour_weight']
-            oil_rs = request.form['oil_rs']
+            flour_rs = request.form['flour_rs']
+
             oil_weight = request.form['oil_weight']
-            khari_rs = request.form['khari_rs']
+            oil_rs = request.form['oil_rs']
+
             khari_weight = request.form['khari_weight']
+            khari_rs = request.form['khari_rs']
+            
             labour_dscri = request.form['labour_dscri']
             labour_rs = request.form['labour_rs']
+
             mill_debit = request.form['mill_debit']
             mill_dscri = request.form['mill_dscri']
+
             home_debit = request.form['home_debit']
             home_dscri = request.form['home_dscri']
-            gehum_rs = request.form['gehum_rs']
-            gehum_weight = request.form['gehum_weight']
 
-            new_product = Mill(m_credit, flour_rs, flour_weight, oil_rs, oil_weight, khari_rs, khari_weight, labour_dscri, labour_rs, mill_debit, mill_dscri, home_debit, home_dscri, gehum_rs, gehum_weight)
-            db.session.add(new_product)
+            gehum_weight = request.form['gehum_weight']
+            gehum_rs = request.form['gehum_rs']
+            
+
+            new_data = MillData(user_id=user.id, mill_credit=mill_credit, flour_weight=flour_weight, flour_rs=flour_rs, oil_weight=oil_weight, oil_rs=oil_rs, khari_weight=khari_weight, khari_rs=khari_rs, labour_dscri=labour_dscri, labour_rs=labour_rs, mill_debit=mill_debit, mill_dscri=mill_dscri, home_debit=home_debit, home_dscri=home_dscri, gehum_weight=gehum_weight, gehum_rs=gehum_rs)
+            db.session.add(new_data)
             db.session.commit()
             flash('Added successful.', 'success')
             return redirect('/add_new_data')

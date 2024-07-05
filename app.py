@@ -266,6 +266,58 @@ def add_new_data():
         flash('You need to login first.', 'error')
         return redirect('/login')
 
+@app.route('/edit_data/<int:data_id>', methods=['GET'])
+def edit_data(data_id):
+    if 'email' in session:
+        user = User.query.filter_by(email=session['email']).first()
+        mill_data = MillData.query.filter_by(id=data_id, user_id=user.id).first()
+        
+        if not mill_data:
+            flash('Data not found or you do not have permission to edit this data.', 'error')
+            return redirect('/dashboard')
+        
+        return render_template('edit_data.html', mill_data=mill_data)
+    else:
+        flash('You need to login first.', 'error')
+        return redirect('/login')
+
+@app.route('/update_data/<int:data_id>', methods=['POST'])
+def update_data(data_id):
+    if 'email' in session:
+        user = User.query.filter_by(email=session['email']).first()
+        mill_data = MillData.query.filter_by(id=data_id, user_id=user.id).first()
+        
+        if not mill_data:
+            flash('Data not found or you do not have permission to edit this data.', 'error')
+            return redirect('/dashboard')
+        
+        mill_data.mill_credit = request.form['m_credit']
+        mill_data.flour_weight = request.form['flour_weight']
+        mill_data.flour_rs = request.form['flour_rs']
+        mill_data.oil_weight = request.form['oil_weight']
+        mill_data.oil_rs = request.form['oil_rs']
+        mill_data.khari_weight = request.form['khari_weight']
+        mill_data.khari_rs = request.form['khari_rs']
+        mill_data.labour_dscri = request.form['labour_dscri']
+        mill_data.labour_rs = request.form['labour_rs']
+        mill_data.mill_debit = request.form['mill_debit']
+        mill_data.mill_dscri = request.form['mill_dscri']
+        mill_data.home_debit = request.form['home_debit']
+        mill_data.home_dscri = request.form['home_dscri']
+        mill_data.gehum_weight = request.form['gehum_weight']
+        mill_data.gehum_rs = request.form['gehum_rs']
+        mill_data.total_credit = int(mill_data.mill_credit) + int(mill_data.flour_rs) + int(mill_data.oil_rs) + int(mill_data.khari_rs)
+        mill_data.total_debit = int(mill_data.mill_debit) + int(mill_data.home_debit) + int(mill_data.gehum_rs) + int(mill_data.labour_rs)
+
+        db.session.commit()
+        flash('Data updated successfully.', 'success')
+        return redirect('/dashboard')
+    else:
+        flash('You need to login first.', 'error')
+        return redirect('/login')
+
+
+
 #About Page
 @app.route('/about')
 def about():

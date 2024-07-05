@@ -165,7 +165,7 @@
                                 <td class="px-6 py-4">{{ mill_dairy_data.labour_dscri }}</td>
                                 <td class="px-6 py-4">{{ mill_dairy_data.gehum_rs }}</td>
                                 <td class="px-6 py-4">{{ mill_dairy_data.gehum_weight }}</td>
-                                <td class="px-6 py-4"><a href="">Edit</a></td>
+                                <td class="px-6 py-4"><a href="{{ url_for('edit_data', data_id=mill_dairy_data.id) }}">Edit</a></td>
                             </tr>
                             {% endfor %}
                         </tbody>

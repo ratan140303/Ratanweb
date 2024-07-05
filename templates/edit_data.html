@@ -1,0 +1,117 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="pt-[44px] w-full">
+    <section class="bg-[#E9F1FA] dark:bg-gray-900">
+        <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
+            <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Edit Mill Data</h2>
+            <form action="{{ url_for('update_data', data_id=mill_data.id) }}" method="post">
+                <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
+                    <div class="sm:col-span-2">
+                        <label for="Mill Credit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Mill Credit
+                        </label>
+                        <input type="number" name="m_credit" value="{{ mill_data.mill_credit }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" required>
+                    </div>
+                    <div>
+                        <label for="Flour-Weight" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Flour-Weight
+                        </label>
+                        <input type="number" step="0.01" name="flour_weight" value="{{ mill_data.flour_weight }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" required>
+                    </div>
+                    <div class="w-full">
+                        <label for="FLOUR-Rs" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Flour-Rs
+                        </label>
+                        <input type="number" name="flour_rs" value="{{ mill_data.flour_rs }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" required>
+                    </div>
+                    <div>
+                        <label for="Oil-Weight" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Oil-Weight
+                        </label>
+                        <input type="number" step="0.01" name="oil_weight" value="{{ mill_data.oil_weight }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="12Kg" required="">
+                    </div>
+                    <div class="w-full">
+                        <label for="Oil-Rs" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Oil-Rs
+                        </label>
+                        <input type="number" name="oil_rs" value="{{ mill_data.oil_rs }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Rs.2999" required="">
+                    </div>
+                    <div>
+                        <label for="khari-Weight" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Khari-Weight
+                        </label>
+                        <input type="number" step="0.01" name="khari_weight" value="{{ mill_data.khari_weight }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="12Kg" required="">
+                    </div>
+                    <div class="w-full">
+                        <label for=" Khari-Rs" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Khari-Rs
+                        </label>
+                        <input type="number" name="khari_rs" value="{{ mill_data.khari_rs }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Rs.2999" required="">
+                    </div>
+                    <div>
+                        <label for="Labour-Dscri" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Labour-Dscription
+                        </label>
+                        <select id="category" name="labour_dscri" value="{{ mill_data.labour_dscri }}" required=""
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                            <option selected="">Select Lobour</option>
+                            <option value="Bhim">Bhim</option>
+                            <option value="Viswa">Viswa</option>
+                            <option value="Viswa">Viswa+Bhim</option>
+                            <option value="Viswa">Null</option>
+                            <option value="Viswa">others..</option>
+                        </select>
+                    </div>
+                    <div class="w-full">
+                        <label for="Labour-Rs" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Labour-Rs
+                        </label>
+                        <input type="number" name="labour_rs" value="{{ mill_data.labour_rs }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Rs.2999" required="">
+                    </div>
+                    <div class="w-full">
+                        <label for="M-Debit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            M-Debit
+                        </label>
+                        <input type="number" name="mill_debit" value="{{ mill_data.mill_debit }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Rs.2999" required="">
+                    </div>
+                    <div class="w-full">
+                        <label for="M-Description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            M-Description
+                        </label>
+                        <input type="text" name="mill_dscri" value="{{ mill_data.mill_dscri }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Mill Description" required="">
+                    </div>
+                    <div class="w-full">
+                        <label for="H-Debit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            H-Debit
+                        </label>
+                        <input type="number" name="home_debit" value="{{ mill_data.home_debit }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Rs.2999" required="">
+                    </div>
+                    <div class="w-full">
+                        <label for="H-Description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            H-Description
+                        </label>
+                        <input type="text" name="home_dscri" value="{{ mill_data.home_dscri }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Home Description" required="">
+                    </div>
+                    <div>
+                        <label for="Gehum-Weight" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Gehum-Weight
+                        </label>
+                        <input type="number" step="0.01" name="gehum_weight" value="{{ mill_data.gehum_weight }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="12Kg" required="">
+                    </div>
+                    <div class="w-full">
+                        <label for=" Gehum-Rs" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Gehum-Rs
+                        </label>
+                        <input type="number" name="gehum_rs" value="{{ mill_data.gehum_rs }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Rs.2999" required="">
+                    </div>
+                    
+                </div>
+                <button type="submit" class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-[#2563eb] rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+                    Update Data
+                </button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

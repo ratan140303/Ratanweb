@@ -160,19 +160,31 @@ def dashboard():
     if 'email' in session:
         user = User.query.filter_by(email=session['email']).first()
 
+        year = datetime.datetime.now().year # Give: 2024/2023..
         current_year = datetime.datetime.now().year # Give: 2024/2023..
-        current_month = datetime.datetime.now().month # Give: 1/2/3/4/5..
-        
+        month = datetime.datetime.now().month # Give: 1/2/3/4/5..
+        month_name = datetime.datetime.now().strftime("%B")
 
-        # Default filter values
-        year = request.form.get('year', current_year) #try to get from year. if not get set as defult current_year
-        month = request.form.get('month', current_month) #try to get from year. if not get set as defult current_month
+        if request.method == 'POST':
+            year = request.form['year']
+            month = request.form['month']
 
-        mill_dairy_datas = MillData.query.filter(
+            year = int(year)
+            month = int(month)
+            month_name = datetime.datetime(year, month, 1).strftime("%B")
+
+            mill_dairy_datas = MillData.query.filter(
             MillData.user_id == user.id,
-            db.extract('year', MillData.date) == int(year),
-            db.extract('month', MillData.date) == int(month)
-        ).all()
+            db.extract('year', MillData.date) == year,
+            db.extract('month', MillData.date) == month
+            ).all()
+        else:
+            mill_dairy_datas = MillData.query.filter(
+            MillData.user_id == user.id,
+            db.extract('year', MillData.date) == year,
+            db.extract('month', MillData.date) == month
+            ).all()
+
 
         # Calculate totals
         total_t_credit = sum(data.total_credit for data in mill_dairy_datas)
@@ -191,8 +203,8 @@ def dashboard():
         total_gehum_weight = sum(data.gehum_weight for data in mill_dairy_datas)
 
         return render_template('dashboard.html', title='Dashboard', current_page='dashboard',
-                               mill_dairy_datas=mill_dairy_datas, current_year=current_year,
-                               current_month=current_month,
+                               mill_dairy_datas=mill_dairy_datas, year=year, current_year=current_year,
+                               month=month, month_name=month_name,
                                total_t_credit=total_t_credit, total_t_debit=total_t_debit,
                                total_m_credit=total_m_credit, total_flour_rs=total_flour_rs,
                                total_flour_weight=total_flour_weight, total_oil_rs=total_oil_rs,

@@ -252,14 +252,14 @@ def add_new_data():
             today_data = MillData.query.filter_by(user_id=user.id, date=today).first()
             if today_data:
                 flash("Today's mill data already exists.", 'error')
-                return redirect('/add_new_data')
+                return redirect('/dashboard')
             
 
             new_data = MillData(user_id=user.id, mill_credit=mill_credit, flour_weight=flour_weight, flour_rs=flour_rs, oil_weight=oil_weight, oil_rs=oil_rs, khari_weight=khari_weight, khari_rs=khari_rs, labour_dscri=labour_dscri, labour_rs=labour_rs, mill_debit=mill_debit, mill_dscri=mill_dscri, home_debit=home_debit, home_dscri=home_dscri, gehum_weight=gehum_weight, gehum_rs=gehum_rs)
             db.session.add(new_data)
             db.session.commit()
             flash('Added successful.', 'success')
-            return redirect('/add_new_data')
+            return redirect('/dashboard')
 
         return render_template('add_new.html', title='Add data', current_page='dashboard')
     else:

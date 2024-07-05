@@ -112,10 +112,10 @@
                     Add product
                 </button>
             </form>
-            <div class="p-4 m-5 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-900 dark:text-red-400" role="alert">
+            <div class="m-5 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-900 dark:text-red-400" role="alert">
                 {% with messages = get_flashed_messages() %}
                 {% if messages %}
-                    <span class="font-medium">{{ messages[0] }}</span>
+                    <p class="font-medium m-2 p-4">{{ messages[0] }}</p>
                 {% endif %}
                 {% endwith %}
             </div>

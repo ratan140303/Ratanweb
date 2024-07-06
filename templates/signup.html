@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='image/favicon.ico') }}" type="image/x-icon">
     <title>{{title}}</title>
     <link rel="stylesheet" href="{{url_for('static', filename='css/output.css')}}">
 </head>
@@ -12,7 +13,7 @@
     <section class="bg-gray-50 dark:bg-gray-900">
         <div class="h-screen flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 bg-[#E9F1FA]">
             <a href="/" class="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-blue-800">
-                <img class="w-8 h-8 mr-2" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg"
+                <img class="w-8 h-8 mr-2" src="{{url_for('static', filename='image/logo.png')}}"
                     alt="logo">
                 Mill Dairy
             </a>

@@ -1,7 +1,10 @@
-from flask import Flask, render_template, redirect, request, flash, session, url_for
+from flask import Flask, render_template, redirect, request, flash, session, send_file
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 import datetime
+import pandas as pd
+from io import BytesIO
+import openpyxl
 
 
 app = Flask(__name__)
@@ -317,7 +320,60 @@ def update_data(data_id):
         return redirect('/login')
 
 
+@app.route('/download_excel', methods=['POST'])
+def download_excel():
+    if 'email' in session:
+        user = User.query.filter_by(email=session['email']).first()
+        year = request.form['year']
+        month = request.form['month']
 
+        year = int(year)
+        month = int(month)
+
+        mill_dairy_datas = MillData.query.filter(
+            MillData.user_id == user.id,
+            db.extract('year', MillData.date) == year,
+            db.extract('month', MillData.date) == month
+        ).all()
+
+        # Create a DataFrame from the query results
+        data = [{
+            "Date": data.date,
+            "Mill Credit": data.mill_credit,
+            "Flour Weight": data.flour_weight,
+            "Flour Rs": data.flour_rs,
+            "Oil Weight": data.oil_weight,
+            "Oil Rs": data.oil_rs,
+            "Khari Weight": data.khari_weight,
+            "Khari Rs": data.khari_rs,
+            "Labour Description": data.labour_dscri,
+            "Labour Rs": data.labour_rs,
+            "Mill Debit": data.mill_debit,
+            "Mill Description": data.mill_dscri,
+            "Home Debit": data.home_debit,
+            "Home Description": data.home_dscri,
+            "Gehum Weight": data.gehum_weight,
+            "Gehum Rs": data.gehum_rs,
+            "Total Credit": data.total_credit,
+            "Total Debit": data.total_debit
+        } for data in mill_dairy_datas]
+
+        df = pd.DataFrame(data)
+
+        # Convert DataFrame to Excel
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Mill Data')
+        
+        output.seek(0)
+        
+        return send_file(output, download_name=f'MillData_{year}_{month}.xlsx', as_attachment=True)
+
+    else:
+        flash('You need to login first.', 'error')
+        return redirect('/login')
+    
+    
 #About Page
 @app.route('/about')
 def about():

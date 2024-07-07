@@ -1,10 +1,14 @@
-from flask import Flask, render_template, redirect, request, flash, session, send_file
+import atexit
+from flask import Flask, current_app, render_template, redirect, request, flash, session, send_file
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 import datetime
 import pandas as pd
 from io import BytesIO
-import openpyxl
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+from flask_apscheduler import APScheduler
+from pytz import timezone
 
 
 app = Flask(__name__)
@@ -15,7 +19,7 @@ app.secret_key = 'Bablu@12345'
 
 db = SQLAlchemy(app)
 
-
+scheduler = APScheduler()
 
 
 # Create Database with the name of "User"
@@ -106,6 +110,44 @@ class Contactus(db.Model):
 with app.app_context():
     db.create_all()
 
+#set defult value of Today in MillData
+def insert_default_values():
+    with app.app_context():
+        today = datetime.date.today()
+        users = User.query.all()
+        for user in users:
+            existing_data = MillData.query.filter_by(user_id=user.id, date=today).first()
+            if not existing_data:
+                default_values = MillData(
+                    user_id=user.id,
+                    mill_credit=0,
+                    flour_weight=0,
+                    flour_rs=0,
+                    oil_weight=0,
+                    oil_rs=0,
+                    khari_weight=0,
+                    khari_rs=0,
+                    labour_dscri="Null",
+                    labour_rs=0,
+                    mill_debit=0,
+                    mill_dscri="Null",
+                    home_debit=0,
+                    home_dscri="Null",
+                    gehum_weight=0,
+                    gehum_rs=0
+                )
+                default_values.date = today  # Ensure the date is correctly set
+                db.session.add(default_values)
+                db.session.commit()
+
+#Automatice sheduled task
+# Configure APScheduler job
+scheduler.add_job(id='insert_default_values_job', func=insert_default_values, trigger='cron', hour=8, minute=0, timezone=timezone('Asia/Kolkata'))
+scheduler.start()
+# Shut down the scheduler when exiting the app
+atexit.register(lambda: scheduler.shutdown())
+
+
 # Home Page 
 @app.route('/home')
 @app.route('/')
@@ -169,26 +211,25 @@ def dashboard():
         month_name = datetime.datetime.now().strftime("%B")
 
         if request.method == 'POST':
-            year = request.form['year']
-            month = request.form['month']
-
-            year = int(year)
-            month = int(month)
+            year = int(request.form['year'])
+            month = int(request.form['month'])
             month_name = datetime.datetime(year, month, 1).strftime("%B")
 
-            mill_dairy_datas = MillData.query.filter(
+        mill_dairy_datas = MillData.query.filter(
             MillData.user_id == user.id,
             db.extract('year', MillData.date) == year,
             db.extract('month', MillData.date) == month
-            ).all()
-        else:
-            mill_dairy_datas = MillData.query.filter(
-            MillData.user_id == user.id,
-            db.extract('year', MillData.date) == year,
-            db.extract('month', MillData.date) == month
-            ).all()
+        ).all()
 
-
+        query = request.args.get('query')
+        if query:
+            query_lower = query.lower()
+            mill_dairy_datas = [
+                data for data in mill_dairy_datas if any(
+                    query_lower in str(getattr(data, attr, '')).lower() for attr in vars(data)
+                )
+            ]
+        
         # Calculate totals
         total_t_credit = sum(data.total_credit for data in mill_dairy_datas)
         total_t_debit = sum(data.total_debit for data in mill_dairy_datas)
@@ -226,6 +267,7 @@ def dashboard():
 def add_new_data():
     if 'email' in session:
         user = User.query.filter_by(email=session['email']).first()
+        date = datetime.datetime.now().strftime('%d-%b-%Y')
         if request.method == 'POST':
             mill_credit = request.form['m_credit']
 
@@ -264,7 +306,7 @@ def add_new_data():
             flash('Added successful.', 'success')
             return redirect('/dashboard')
 
-        return render_template('add_new.html', title='Add data', current_page='dashboard')
+        return render_template('add_new.html', title='Add data', current_page='dashboard', date=date)
     else:
         flash('You need to login first.', 'error')
         return redirect('/login')

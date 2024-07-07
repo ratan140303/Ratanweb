@@ -1,12 +1,10 @@
 import atexit
-from flask import Flask, current_app, render_template, redirect, request, flash, session, send_file
+from flask import Flask, render_template, redirect, request, flash, session, send_file
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 import datetime
 import pandas as pd
 from io import BytesIO
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
 from flask_apscheduler import APScheduler
 from pytz import timezone
 
@@ -142,7 +140,7 @@ def insert_default_values():
 
 #Automatice sheduled task
 # Configure APScheduler job
-scheduler.add_job(id='insert_default_values_job', func=insert_default_values, trigger='cron', hour=8, minute=0, timezone=timezone('Asia/Kolkata'))
+scheduler.add_job(id='insert_default_values_job', func=insert_default_values, trigger='cron', hour=7, minute=35, timezone=timezone('Asia/Kolkata'))
 scheduler.start()
 # Shut down the scheduler when exiting the app
 atexit.register(lambda: scheduler.shutdown())

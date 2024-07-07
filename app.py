@@ -140,7 +140,7 @@ def insert_default_values():
 
 #Automatice sheduled task
 # Configure APScheduler job
-scheduler.add_job(id='insert_default_values_job', func=insert_default_values, trigger='cron', hour=7, minute=35, timezone=timezone('Asia/Kolkata'))
+scheduler.add_job(id='insert_default_values_job', func=insert_default_values, trigger='cron', hour=8, minute=00, timezone=timezone('Asia/Kolkata'))
 scheduler.start()
 # Shut down the scheduler when exiting the app
 atexit.register(lambda: scheduler.shutdown())
